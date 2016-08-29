@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/menuLivePresence"
+            android:checked="false"
+            android:title="@string/live_presence" />
+
+        <item
+            android:id="@+id/menuGeoFencing"
+            android:checked="false"
+            android:title="@string/geo_fencing" />
+
+        <item
+            android:id="@+id/menuMyAccount"
+            android:checked="false"
+            android:title="@string/my_account" />
+
+        <item
+            android:id="@+id/menuLogout"
+            android:checked="false"
+            android:title="@string/logout" />
+
+    </group>
+
+</menu>

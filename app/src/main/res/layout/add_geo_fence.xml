@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <ImageView android:id="@+id/imgMapType"
+        android:layout_width="@dimen/img_map_type"
+        android:layout_height="@dimen/img_map_type"
+        android:layout_gravity="right|bottom"
+        android:background="#9F000000"
+        android:src="@drawable/ic_satellite_white_24dp"
+        android:elevation="4dp"
+        android:layout_marginRight="@dimen/dp_5"
+        android:layout_marginBottom="@dimen/dp_5"/>
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/lnrPull"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:background="#8F000000"
+        android:orientation="vertical"
+        android:padding="@dimen/dp_5">
+
+        <ImageView
+            android:id="@+id/imgPull"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_keyboard_arrow_up_white_24dp" />
+    </LinearLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:clipToPadding="true"
+        android:elevation="4dp"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/lnrBottomPull"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:background="#9F000000"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_5">
+
+                <ImageView
+                    android:id="@+id/imgBottomPull"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_keyboard_arrow_down_white_24dp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/lnrAddContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="#9F000000"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_10">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sub_header_text" />
+
+                <EditText
+                    android:id="@+id/txtGeoFenceName"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:hint="@string/title"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:padding="@dimen/dp_10"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="@dimen/normal_text" />
+
+                <EditText
+                    android:id="@+id/txtDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:hint="@string/description"
+                    android:padding="@dimen/dp_10"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="@dimen/normal_text" />
+
+                <EditText
+                    android:id="@+id/txtLatitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:clickable="false"
+                    android:enabled="false"
+                    android:focusable="false"
+                    android:hint="@string/latitude"
+                    android:padding="@dimen/dp_10"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="@dimen/normal_text" />
+
+                <EditText
+                    android:id="@+id/txtLongitude"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:clickable="false"
+                    android:enabled="false"
+                    android:focusable="false"
+                    android:hint="@string/longitude"
+                    android:padding="@dimen/dp_10"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="@dimen/normal_text" />
+
+                <RelativeLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+                    <EditText
+                        android:id="@+id/txtRadius"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="@dimen/dp_5"
+                        android:hint="Radius"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:padding="@dimen/dp_10"
+                        android:textColor="@android:color/white"
+                        android:textColorHint="@android:color/white"
+                        android:textSize="@dimen/normal_text" />
+                    <TextView
+                        android:id="@+id/text_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:text="(in meters)"
+                        android:textSize="18sp"
+                        android:layout_marginRight="10dp"
+                        android:textColor="#808080"
+                        />
+                </RelativeLayout>
+
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/notify_me"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/normal_text" />
+
+                    <RadioGroup
+                        android:id="@+id/rgNotify"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_5">
+
+                        <RadioButton
+                            android:id="@+id/rdbtnWhenEnter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/when_enter"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/normal_text" />
+
+                        <RadioButton
+                            android:id="@+id/rdbtnWhenExit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/when_exit"
+                            android:textColor="@android:color/white"
+                            android:textSize="@dimen/normal_text" />
+                    </RadioGroup>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnCancel"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/dp_5"
+                        android:layout_marginTop="@dimen/dp_5"
+                        android:background="@android:color/white"
+                        android:elevation="4dp"
+                        android:padding="@dimen/dp_10"
+                        android:text="@string/cancel"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="@dimen/normal_text" />
+
+                    <Button
+                        android:id="@+id/btnAddGeoFence"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/dp_5"
+                        android:layout_marginTop="@dimen/dp_5"
+                        android:background="@color/colorPrimary"
+                        android:elevation="4dp"
+                        android:padding="@dimen/dp_10"
+                        android:text="@string/addgeofence"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/normal_text" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/lnrFrameContainer"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent" android:background="@android:color/white">
+
+    <LinearLayout
+        android:id="@+id/lnrEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    >
+
+        <TextView
+            android:id="@+id/lblNoGeofence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="@dimen/dp_10"
+            android:text="@string/no_geofence_yet"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/normal_text"/>
+
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recViewGeofenceList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recViewGeofenceListSearch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"
+        android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabAddGeoFence"
+        style="@style/FloatingActionButton"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_add_white_24dp"
+    />
+
+
+</FrameLayout>

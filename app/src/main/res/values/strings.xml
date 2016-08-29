@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">SpeedVts</string>
+
+    <!--API KEYS-->
+    <string name="google_map_dev_key">AIzaSyDwZSp4T76I3MPB4FN-8PIrj32mFzP3MuM</string>
+
+    <!--Login -->
+    <string name="email_or_mobile">Email id / Mobile No</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="forgot_password">Forgot Password</string>
+
+    <string name="or">OR</string>
+    <string name="singin_fb">Signin with FACEBOOK</string>
+
+    <!-- SLide Menu Items -->
+    <string name="live_presence">Live Presence</string>
+    <string name="geo_fencing">Geo Fencing</string>
+    <string name="my_account">My Account</string>
+    <string name="logout">Logout</string>
+    <string name="title_activity_live_presence_fragment">Map</string>
+
+    <!-- Validation messages-->
+    <string name="enter_email_mobile_number">Please enter Email ID or Mobile Number</string>
+    <string name="enter_password">Please enter password</string>
+
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="change_password">Change Password</string>
+
+    <string name="enter_current_password">Please enter current password</string>
+    <string name="enter_new_password">Please enter new password</string>
+    <string name="enter_confirm_password">Please enter confirm password</string>
+
+    <string name="password_char_minimum">Password should contains minimum of 6 characters</string>
+    <string name="passwords_not_equal">Password and Confirm Password not matching</string>
+    <string name="permission_needed_message">Some functionality will not work if the permission is not granted.</string>
+
+    <string name="no_geofence_yet">No geofence created yet. Click the plus button to create one.</string>
+
+    <string name="geofence_ame">Name</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="radius">Radius</string>
+    <string name="addgeofence">Add a Geofence</string>
+    <string name="edit_geofence">Update Geofence</string>
+
+    <string name="delete">Delete</string>
+    <!-- Units -->
+    <string name="degrees_unit">\u00B0</string>
+    <string name="kilometers_unit">km</string>
+    <string name="notify_me">Notify Me</string>
+    <string name="when_enter">When Enter</string>
+    <string name="when_exit">When Exit</string>
+
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="enter_geo_fence">You entered in </string>
+    <string name="edit">Edit</string>
+</resources>
