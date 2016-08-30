@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.Api;
 import com.google.gson.Gson;
@@ -380,20 +381,33 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                 if (geofenceListAdapter!=null){
                     logD(tag);
                     if (tag.equalsIgnoreCase(ApiMethods.geofence+"/get")){
+                        rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.GONE);
+                        recViewGeofenceList.setVisibility(View.VISIBLE);
 //                        arrListSpeedGeofences = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();
                         geofenceListAdapter.notifyDataSetChanged();
                         geofenceListAdapter.setLoaded();
                     }else if (tag.equalsIgnoreCase(ApiMethods.geofence+"/search")){
                         logD("inside search results");
                         logD("Clear the adapter and reset");
-                        geofenceListAdapter = new GeofenceListAdapter(
-                                arrListSpeedGeofences , this, recViewGeofenceList);
-                        logD(geofenceListAdapter.getItemCount()+"");
-                        recViewGeofenceList.setAdapter(geofenceListAdapter);
+                        if (arrListSpeedGeofences!=null && arrListSpeedGeofences.size()>0){
+                            rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.GONE);
+                            recViewGeofenceList.setVisibility(View.VISIBLE);
+                            geofenceListAdapter = new GeofenceListAdapter(
+                                    arrListSpeedGeofences , this, recViewGeofenceList);
+                            logD(geofenceListAdapter.getItemCount()+"");
+                            recViewGeofenceList.setAdapter(geofenceListAdapter);
 
-                        setLoadMoreListner(searchView.getQuery().toString());
+                            setLoadMoreListner(searchView.getQuery().toString());
+                        }else {
+                            ((TextView)rootView.findViewById(R.id.lblNoGeofence)).setText("No geofece found for this search query.");
+                            rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.VISIBLE);
+                            recViewGeofenceList.setVisibility(View.GONE);
+                        }
+
                     }
                 }else{
+                    rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.GONE);
+                    recViewGeofenceList.setVisibility(View.VISIBLE);
                     logI("Adapter null");
 //                    arrListSpeedGeofences = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();
                     geofenceListAdapter = new GeofenceListAdapter(
@@ -418,22 +432,25 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
 
     private void setLoadMoreListner(final String searchText){
         logD("Load more listener initiated");
-        geofenceListAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                arrListSpeedGeofences.add(null);
-                geofenceListAdapter.notifyItemInserted(arrListSpeedGeofences.size()-1);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        arrListSpeedGeofences.remove(arrListSpeedGeofences.size()-1);
-                        geofenceListAdapter.notifyItemRemoved(arrListSpeedGeofences.size());
-                        page = page + 1;
-                        getGeofenceList(false, searchText);
-                    }
-                }, 5000);
-            }
-        });
+        if (arrListSpeedGeofences.size()>0){
+            geofenceListAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
+                @Override
+                public void onLoadMore() {
+                    arrListSpeedGeofences.add(null);
+                    geofenceListAdapter.notifyItemInserted(arrListSpeedGeofences.size()-1);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            arrListSpeedGeofences.remove(arrListSpeedGeofences.size()-1);
+                            geofenceListAdapter.notifyItemRemoved(arrListSpeedGeofences.size());
+                            page = page + 1;
+                            getGeofenceList(false, searchText);
+                        }
+                    }, 5000);
+                }
+            });
+        }
+
     }
 
     private boolean checkFenceAdded(SpeedVtsGeofence speedVtsGeofence){

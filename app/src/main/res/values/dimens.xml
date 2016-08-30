@@ -23,4 +23,6 @@
     
     <dimen name="img_map_type">45dp</dimen>
 
+    <dimen name="satilite_icon_padding_top">60dp</dimen>
+
 </resources>
