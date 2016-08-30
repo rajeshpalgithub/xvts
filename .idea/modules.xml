@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/SpeedVts.iml" filepath="$PROJECT_DIR$/SpeedVts.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/xvts.iml" filepath="$PROJECT_DIR$/xvts.iml" />
     </modules>
   </component>
 </project>

@@ -13,7 +13,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
@@ -92,7 +91,6 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
     int position = 0;
 
     ImageView imgMapType;
-    private ImageView imgBottomPull;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,9 +123,6 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         imgMapType = (ImageView) findViewById(R.id.imgMapType);
         imgMapType.setOnClickListener(this);
 
-        imgBottomPull = (ImageView) findViewById(R.id.imgBottomPull);
-        imgBottomPull.setOnClickListener(this);
-
         txtName = (EditText) findViewById(R.id.txtGeoFenceName);
         txtDescription = (EditText) findViewById(R.id.txtDescription);
         txtLatitude = (EditText) findViewById(R.id.txtLatitude);
@@ -141,21 +136,6 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
 
         if (bottomSheet != null) {
             mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-            mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                @Override
-                public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                    if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                        findViewById(R.id.lnrPull).setVisibility(View.GONE);
-                    } else {
-                        findViewById(R.id.lnrPull).setVisibility(View.VISIBLE);
-                    }
-                }
-
-                @Override
-                public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-                }
-            });
         }
 
         Bundle extras = getIntent().getExtras();
@@ -188,7 +168,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             }
         }else{
             Snackbar.make(main_content, "Long press on a position in the map to add a Geo Fence.",
-                    Snackbar.LENGTH_LONG).setAction("Okay", new View.OnClickListener() {
+                    Snackbar.LENGTH_INDEFINITE).setAction("Okay", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
@@ -267,7 +247,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                     .title("Geo Fencing"));
             txtLatitude.setText(""+latLng.latitude);
             txtLongitude.setText(""+latLng.longitude);
-//            imgPull.setImageResource(R.drawable.ic_keyboard_arrow_down_white_24dp);
+            imgPull.setImageResource(R.drawable.ic_keyboard_arrow_down_white_24dp);
             lnrAddContent.setVisibility(View.VISIBLE);
         }
     }
@@ -281,11 +261,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                             Snackbar.LENGTH_INDEFINITE).show();
                     return;
                 }
-                findViewById(R.id.lnrPull).setVisibility(View.GONE);
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                break;
-            case R.id.imgBottomPull:
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 break;
             case R.id.btnCancel:
                 if (speedVtsGeofenceEdit == null) {
@@ -339,7 +315,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             return;
         if (!validateFieldsEmpty(txtLongitude, "Please enter Longitude", main_content, getWindow()))
             return;
-        if (!validateFieldsEmpty(txtRadius, "Please enter Radius", main_content, getWindow()))
+        if (!validateFieldsEmpty(txtRadius, "Please enter Longitude", main_content, getWindow()))
             return;
 
         double latitude = Double.parseDouble(txtLatitude.getText().toString().trim());
