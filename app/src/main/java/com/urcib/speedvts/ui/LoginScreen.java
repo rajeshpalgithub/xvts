@@ -109,7 +109,10 @@ public class LoginScreen extends SpeedVtsAppCombatBase implements View.OnClickLi
             if (jsonObject.has(WebserviceKeys.token)){
                 String token = getJsonObjectValueForString(jsonObject, WebserviceKeys.token);
                 SpeedVtsPreferences.setStringValue(LoginScreen.this, token_key, token);
-                showActivity(LoginScreen.this, SpeedVtsHome.class);
+                if (SpeedVtsPreferences.getBooleanValue(LoginScreen.this, IS_FIRST_TIME_LAUNCH))
+                    showActivity(LoginScreen.this, SpeedVtsHome.class);
+                else
+                    showActivity(LoginScreen.this, WelcomeActivity.class);
             }
         }catch (Exception ex){
             ex.printStackTrace();

@@ -50,5 +50,6 @@ public interface WebserviceConstants {
         String page = "page";
         String record = "record";
         String search_title = "search_title";
+        String total_records = "total_records";
     }
 }

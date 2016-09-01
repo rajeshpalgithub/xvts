@@ -35,6 +35,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.WelcomeActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
+            android:screenOrientation="portrait"/>
+        <activity
             android:name=".ui.LoginScreen"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
             android:screenOrientation="portrait"/>

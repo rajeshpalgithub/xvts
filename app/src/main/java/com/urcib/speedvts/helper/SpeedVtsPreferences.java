@@ -19,6 +19,7 @@ public class SpeedVtsPreferences {
     public interface PreferenceKeys{
         String token_key = "token";
         String latest_position = "latest_position";
+        String IS_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
     }
 
     public static String getStringValue(Context context, String key){
