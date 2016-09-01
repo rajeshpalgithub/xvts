@@ -11,4 +11,6 @@ package com.urcib.speedvts.helper;
 public interface BundleKeys {
     String geofence_details = "geofence_details";
     String position = "position";
+    String geofence_details_id = "geofence_details_id";
+
 }

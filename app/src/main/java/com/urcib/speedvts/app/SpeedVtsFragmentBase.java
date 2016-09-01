@@ -11,12 +11,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 
 import com.crashlytics.android.Crashlytics;
+import com.urcib.speedvts.R;
 import com.urcib.speedvts.adapters.InternetConnectionListener;
 import com.urcib.speedvts.helper.SpeedVtsConstants;
 import com.urcib.speedvts.helper.SpeedVtsPreferences;
@@ -220,6 +222,17 @@ public class SpeedVtsFragmentBase extends Fragment implements RequestListener,
 
         }
         return true;
+    }
+
+    public void switchFrags(Fragment fragment, String name, boolean addToBack) {
+        FragmentTransaction transition = getFragmentManager()
+                .beginTransaction();
+        transition.add(R.id.frame, fragment);
+        transition.show(fragment);
+        if (addToBack)
+            transition.addToBackStack(fragment.getClass().getName());
+        transition.commit();
+        ((SpeedVtsAppCombatBase)getActivity()).setTitle(name);
     }
 
 }

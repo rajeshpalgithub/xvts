@@ -4,15 +4,15 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_marginEnd="@dimen/dp_5"
     android:layout_marginStart="@dimen/dp_5"
     android:layout_marginTop="@dimen/dp_5"
+    android:clickable="true"
     card_view:cardBackgroundColor="@android:color/white"
     card_view:cardCornerRadius="6dp">
 
     <LinearLayout
-        android:id="@+id/lnrGeofenceList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -103,8 +103,8 @@
         <View style="@style/Geofence.Divider"/>
 
         <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnEdit"

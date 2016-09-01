@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -33,12 +34,13 @@ public class GeofenceListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private boolean isLoading;
     private int visibleThreshold = 5;
     private int lastVisibleItem, totalItemCount;
+    private View.OnClickListener onClickListener;
 
     public GeofenceListAdapter(List<SpeedVtsGeofence> speedVtsGeofenceList, View.OnClickListener listner,
-                               RecyclerView recVGeoFence) {
+                               RecyclerView recVGeoFence, View.OnClickListener onClickListener) {
         this.speedVtsGeofenceList = speedVtsGeofenceList;
         this.listner = listner;
-
+        this.onClickListener = onClickListener;
         final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recVGeoFence.getLayoutManager();
         recVGeoFence.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -109,12 +111,12 @@ public class GeofenceListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             geoFenceViewHolder.btnDelete.setOnClickListener(listner);
             geoFenceViewHolder.btnEdit.setOnClickListener(listner);
+            geoFenceViewHolder.lnrGeofenceList.setTag(speedVtsGeofenceList.get(position));
+            geoFenceViewHolder.lnrGeofenceList.setOnClickListener(onClickListener);
         }else if (holder instanceof LoadingViewHolder) {
             LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
             loadingViewHolder.progressBar.setIndeterminate(true);
         }
-
-
     }
 
     @Override
@@ -136,6 +138,7 @@ public class GeofenceListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         TextView lblRadius;
         Button btnDelete;
         Button btnEdit;
+        LinearLayout lnrGeofenceList;
 
         public GeoFenceViewHolder(ViewGroup v) {
             super(v);
@@ -146,6 +149,7 @@ public class GeofenceListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             lblRadius = (TextView) v.findViewById(R.id.lblRadius);
             btnDelete = (Button) v.findViewById(R.id.btnDelete);
             btnEdit = (Button) v.findViewById(R.id.btnEdit);
+            lnrGeofenceList = (LinearLayout) v.findViewById(R.id.lnrGeofenceList);
         }
     }
 
