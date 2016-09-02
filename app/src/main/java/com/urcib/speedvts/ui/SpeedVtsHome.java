@@ -251,7 +251,7 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
                 SpeedVtsPreferences.getStringValue(this , token_key);
         String tag =  WebserviceConstants.ApiMethods.geofence+"/get";
         WebService.getInstance(this).doRequestwithGET(this, tag, getGeofenceUrl,
-                new HashMap<String, String>(), this, true);
+                new HashMap<String, String>(), this, false);
     }
 
     private SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener

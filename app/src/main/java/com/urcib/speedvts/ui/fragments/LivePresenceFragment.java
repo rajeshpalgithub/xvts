@@ -1,37 +1,33 @@
 package com.urcib.speedvts.ui.fragments;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatSeekBar;
-import android.support.v7.widget.AppCompatSpinner;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -43,15 +39,12 @@ import com.urcib.speedvts.app.SpeedVtsFragmentBase;
 import com.urcib.speedvts.helper.SpeedVtsPreferences;
 import com.urcib.speedvts.model.VehiclePosition;
 import com.urcib.speedvts.ui.SpeedVtsHome;
-import com.urcib.speedvts.ui.WelcomeActivity;
 import com.urcib.speedvts.webservice.WebService;
-import com.urcib.speedvts.webservice.api.WebserviceConstants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -62,11 +55,11 @@ import java.util.TimerTask;
  * @version 1.0.0
  * @copyright URCIB TECHNOLOGIES PVT LTD
  * @created on 09/08/16
- *
+ * <p>
  * Application class
  */
 public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapReadyCallback,
-        View.OnClickListener{
+        View.OnClickListener {
 
     private View rootView;
 
@@ -77,7 +70,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     private MapView mMapView;
     private GoogleMap mMap;
 
-    private Timer timerPing;
+    private Timer timerPing,timerPosition;
     private LinearLayout lnrRoot;
     // Request code for the permissions
     private final int REQUEST_NEEDED_PERMISSION = 213;
@@ -87,8 +80,10 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     private int page = 1;
     private int totalRecords = 50;
 
-    private AppCompatSeekBar seekPositionRecords;
-
+    private ProgressBar seekPositionRecords;
+    private Button btnMap, btnStatics;
+    VehiclePosition latestVehiclePosition;
+    private boolean isMapScreen = true;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -104,13 +99,17 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         return rootView;
     }
 
-    private void init(){
+    private void init() {
         lnrRoot = (LinearLayout) rootView.findViewById(R.id.lnrRoot);
         rootView.findViewById(R.id.btnStatics).setOnClickListener(this);
         imgMapType = (ImageView) rootView.findViewById(R.id.imgMapType);
         imgMapType.setOnClickListener(this);
-
-        seekPositionRecords = (AppCompatSeekBar) rootView.findViewById(R.id.seekPosition);
+        btnMap = (Button) rootView.findViewById(R.id.btnMap);
+        btnMap.setTextColor(getActivity().getResources().getColor(R.color.colorAccent));
+        btnStatics = (Button) rootView.findViewById(R.id.btnStatics);
+        btnMap.setOnClickListener(this);
+        seekPositionRecords = (ProgressBar) rootView.findViewById(R.id.seekPosition);
+        seekPositionRecords.setVisibility(View.GONE);
         rootView.findViewById(R.id.imgNextPositions).setOnClickListener(this);
 
         try {
@@ -122,19 +121,19 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         mMapView.getMapAsync(this);
     }
 
-    private void callPositionApi(int page, int records){
-        if (haveInternet(getActivity())){
+    private void callPositionApi(int page, int records,boolean loading) {
+        if (haveInternet(getActivity())) {
             String positionUrl = BASE_URL + ApiMethods.position + querySymbol + WebserviceKeys.token + "="
-                    + SpeedVtsPreferences.getStringValue(getActivity(), token_key)+"&"+WebserviceKeys.page+"="+page
-                    +"&records="+records+"&Order=desc";
+                    + SpeedVtsPreferences.getStringValue(getActivity(), token_key) + "&" + WebserviceKeys.page + "=" + page
+                    + "&records=" + records + "&Order=desc";
 
             WebService.getInstance(getActivity()).doRequestwithGET(getActivity(), ApiMethods.position,
-                    positionUrl, new HashMap<String, String>(), this, true);
+                    positionUrl, new HashMap<String, String>(), this, loading);
         }
     }
 
 
-    private void ping(){
+    private void ping() {
         String pingUrl = BASE_URL + ApiMethods.ping + querySymbol + WebserviceKeys.token + "="
                 + SpeedVtsPreferences.getStringValue(getActivity(), token_key);
 
@@ -177,7 +176,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED ) {
+                            != PackageManager.PERMISSION_GRANTED) {
                 // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                         Manifest.permission.ACCESS_FINE_LOCATION)
@@ -193,19 +192,19 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                                     // Here request the permission again
                                     ActivityCompat.requestPermissions(getActivity(), new String[]
                                             {Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_NEEDED_PERMISSION);
+                                                    Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_NEEDED_PERMISSION);
                                 }
                             }).show();
                 } else {
                     // Here no need explanation, just request the permission
                     ActivityCompat.requestPermissions(getActivity(), new String[]
                             {Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_NEEDED_PERMISSION);
+                                    Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_NEEDED_PERMISSION);
                 }
             } else {
-                if (checkLocationEnabled(getActivity())){
+                if (checkLocationEnabled(getActivity())) {
                     mMap.setMyLocationEnabled(true);
-                    if (haveInternet(getActivity())){
+                    if (haveInternet(getActivity())) {
                         ping();
                         callAsynchronousTask();
                     }
@@ -214,9 +213,9 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
 
             }
         } else {
-            if (checkLocationEnabled(getActivity())){
+            if (checkLocationEnabled(getActivity())) {
                 mMap.setMyLocationEnabled(true);
-                if (haveInternet(getActivity())){
+                if (haveInternet(getActivity())) {
                     ping();
                     callAsynchronousTask();
                 }
@@ -291,13 +290,13 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         double lon = Double.parseDouble(vehiclePosition.longitude);
         LatLng newPosition = new LatLng(lat, lon);
 
-        if (vehicleMarker!=null){
+        if (vehicleMarker != null) {
             vehicleMarker.setPosition(newPosition);
-        }else {
+        } else {
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(newPosition);
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_red));
-            if (vehiclePosition.marker == 2){
+            if (vehiclePosition.marker == 2) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_green));
             }
             markerOptions.title(vehiclePosition.device_name);
@@ -321,7 +320,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
 
     }
 
-    private void drawRoute(){
+    private void drawRoute() {
         seekPositionRecords.setProgress(vehiclePositionArrayList.size());
         PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE).geodesic(true);
         for (int z = 0; z < vehiclePositionArrayList.size(); z++) {
@@ -332,7 +331,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
             options.add(newPosition);
         }
 
-        if (mMap!=null){
+        if (mMap != null) {
             mMap.clear();
         }
 //        if (polyline!=null)
@@ -340,6 +339,16 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
 
         polyline = mMap.addPolyline(options);
         logD("Polyline added");
+        VehiclePosition vehiclePosition = vehiclePositionArrayList.get(0);
+        double lat = Double.parseDouble(vehiclePosition.latitude);
+        double lon = Double.parseDouble(vehiclePosition.longitude);
+        LatLng newPosition = new LatLng(lat, lon);
+        // Construct a CameraPosition focusing on Mountain VigetActivity()ew and animate the camera to that position.
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(newPosition)      // Sets the center of the map to Mountain View
+                .zoom(19)                   // Sets the zoom
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     public void callAsynchronousTask() {
@@ -352,8 +361,6 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                     public void run() {
                         try {
                             ping();
-//                            page = page+1;
-//                            callPositionApi(page, 100);
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                         }
@@ -365,49 +372,74 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     }
 
 
+    public void callAsynchronousGetPosition(){
+        final Handler handler = new Handler();
+        timerPosition = new Timer();
+        TimerTask dTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+                            if(!isMapScreen){
+                                page = page + 1;
+                                callPositionApi(page,100,false);
+                            }
+                        } catch (Exception e){
+
+                        }
+                    }
+                });
+            }
+        };
+        timerPosition.schedule(dTimerTask,0,10000);
+    }
 
     @Override
     public void onSuccessResponse(String tag, int responseCode, String responseMsg) {
         super.onSuccessResponse(tag, responseCode, responseMsg);
-        if (tag.equalsIgnoreCase(ApiMethods.ping)){
+        if (tag.equalsIgnoreCase(ApiMethods.ping)) {
             try {
                 JSONObject responseJsObj = new JSONObject(responseMsg);
-                if (responseJsObj.has(WebserviceKeys.ping)){
+                if (responseJsObj.has(WebserviceKeys.ping)) {
                     Gson gson = new Gson();
-                    VehiclePosition vehiclePosition = gson.fromJson(getJsonObjectValueForString
+                     latestVehiclePosition = gson.fromJson(getJsonObjectValueForString
                             (responseJsObj, WebserviceKeys.ping), VehiclePosition.class);
                     SpeedVtsPreferences.setStringValue(getActivity(), SpeedVtsPreferences.PreferenceKeys.latest_position,
-                            gson.toJson(vehiclePosition));
-                    if (mMap!=null){
-                        placeMarker(vehiclePosition);
+                            gson.toJson(latestVehiclePosition));
+                    if (mMap != null && isMapScreen) {
+                        placeMarker(latestVehiclePosition);
                     }
                 }
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
-        else if (tag.equalsIgnoreCase(ApiMethods.position)){
+        } else if (tag.equalsIgnoreCase(ApiMethods.position)) {
             try {
                 JSONObject responseJsObj = new JSONObject(responseMsg);
-                if (responseJsObj.has(WebserviceKeys.ping)){
+                if (responseJsObj.has(WebserviceKeys.ping)) {
                     JSONArray pingJsArray = responseJsObj.getJSONArray(WebserviceKeys.ping);
-                    if (pingJsArray!=null && pingJsArray.length()>0){
+                    if (pingJsArray != null && pingJsArray.length() > 0) {
                         Gson gson = new Gson();
-                        for (int i=0; i<pingJsArray.length(); i++){
+                        for (int i = 0; i < pingJsArray.length(); i++) {
                             VehiclePosition vehiclePosition = gson.fromJson(pingJsArray.getJSONObject(i).toString(),
                                     VehiclePosition.class);
                             vehiclePositionArrayList.add(vehiclePosition);
                         }
-                        if (mMap!=null && vehiclePositionArrayList!=null && vehiclePositionArrayList.size()>0){
+                        if (mMap != null && vehiclePositionArrayList != null && vehiclePositionArrayList.size() > 0) {
                             drawRoute();
                         }
                     }
                 }
-                if (responseJsObj.has(WebserviceKeys.total_records)){
+                if (responseJsObj.has(WebserviceKeys.total_records)) {
                     totalRecords = responseJsObj.getInt(WebserviceKeys.total_records);
                     seekPositionRecords.setMax(totalRecords);
                 }
-            }catch (Exception ex){
+                if(timerPosition==null){
+                    callAsynchronousGetPosition();
+                }
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -417,7 +449,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     @Override
     public void onErrorResponse(String tag, int responseCode, String responseMsg) {
         super.onErrorResponse(tag, responseCode, responseMsg);
-        if (tag.equalsIgnoreCase(ApiMethods.position)){
+        if (tag.equalsIgnoreCase(ApiMethods.position)) {
             page = page - 1;
         }
     }
@@ -426,10 +458,8 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     public void onResume() {
         super.onResume();
         mMapView.onResume();
-        if (timerPing!=null){
-            timerPing.cancel();
-            timerPing.purge();
-        }
+        callAsynchronousTask();
+
 //        getActivity().getSharedPreferences(SpeedVtsPreferences.KEY, Context.MODE_PRIVATE).
 //                registerOnSharedPreferenceChangeListener(this);
     }
@@ -438,7 +468,10 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     public void onPause() {
         super.onPause();
         mMapView.onPause();
-        callAsynchronousTask();
+        if (timerPing != null) {
+            timerPing.cancel();
+            timerPing.purge();
+        }
 //        getActivity().getSharedPreferences(SpeedVtsPreferences.KEY, Context.MODE_PRIVATE).
 //                unregisterOnSharedPreferenceChangeListener(this);
     }
@@ -447,7 +480,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     public void onDestroy() {
         super.onDestroy();
         mMapView.onDestroy();
-        if (timerPing!=null){
+        if (timerPing != null) {
             timerPing.cancel();
             timerPing.purge();
         }
@@ -462,27 +495,48 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.btnMap:
+                seekPositionRecords.setProgress(0);
+                if(mMap!=null){
+                   mMap.clear();
+                    page = 1;
+                    vehiclePositionArrayList.clear();
+                }
+                if (timerPosition != null) {
+                    timerPosition.cancel();
+                    timerPosition.purge();
+                }
+                if(latestVehiclePosition!=null){
+                    placeMarker(latestVehiclePosition);
+                }
+                btnStatics.setTextColor(getActivity().getResources().getColor(R.color.black));
+                btnMap.setTextColor(getActivity().getResources().getColor(R.color.colorAccent));
+                seekPositionRecords.setVisibility(View.GONE);
                 break;
             case R.id.btnStatics:
-                callPositionApi(page,100);
+                isMapScreen = false;
+                vehicleMarker = null;
+                btnStatics.setTextColor(getActivity().getResources().getColor(R.color.colorAccent));
+                btnMap.setTextColor(getActivity().getResources().getColor(R.color.black));
+                seekPositionRecords.setVisibility(View.VISIBLE);
+                callPositionApi(page, 100,true);
 //                Snackbar.make(lnrRoot, "Page under development", Snackbar.LENGTH_LONG).show();
                 break;
             case R.id.imgMapType:
-                if (mMap!=null){
-                    if (mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL){
+                if (mMap != null) {
+                    if (mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
                         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                         imgMapType.setImageResource(R.drawable.ic_map_white_24dp);
-                    }else{
+                    } else {
                         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                         imgMapType.setImageResource(R.drawable.ic_satellite_white_24dp);
                     }
                 }
                 break;
             case R.id.imgNextPositions:
-                page = page+1;
-                callPositionApi(page, 100);
+                page = page + 1;
+                callPositionApi(page, 100,true);
                 break;
             default:
                 break;
@@ -491,12 +545,12 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
 
     @Override
     public void onBackStackChanged() {
-        if (getFragmentManager()!=null){
+        if (getFragmentManager() != null) {
             int backStackCount = getFragmentManager().getBackStackEntryCount();
-            String backStackName = getFragmentManager().getBackStackEntryAt(backStackCount-1).getName();
+            String backStackName = getFragmentManager().getBackStackEntryAt(backStackCount - 1).getName();
             logD(backStackName);
-            if (backStackName.equalsIgnoreCase(LivePresenceFragment.class.getName())){
-                ((SpeedVtsHome)getActivity()).setActionBarTitle("Live Presence");
+            if (backStackName.equalsIgnoreCase(LivePresenceFragment.class.getName())) {
+                ((SpeedVtsHome) getActivity()).setActionBarTitle("Live Presence");
 
             }
 
