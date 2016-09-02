@@ -43,7 +43,9 @@ import com.urcib.speedvts.app.SpeedVtsFragmentBase;
 import com.urcib.speedvts.helper.SpeedVtsPreferences;
 import com.urcib.speedvts.model.VehiclePosition;
 import com.urcib.speedvts.ui.SpeedVtsHome;
+import com.urcib.speedvts.ui.WelcomeActivity;
 import com.urcib.speedvts.webservice.WebService;
+import com.urcib.speedvts.webservice.api.WebserviceConstants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -118,8 +120,6 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         }
 
         mMapView.getMapAsync(this);
-        callPositionApi(page,50);
-
     }
 
     private void callPositionApi(int page, int records){
@@ -129,7 +129,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                     +"&records="+records+"&Order=desc";
 
             WebService.getInstance(getActivity()).doRequestwithGET(getActivity(), ApiMethods.position,
-                    positionUrl, new HashMap<String, String>(), this, false);
+                    positionUrl, new HashMap<String, String>(), this, true);
         }
     }
 
@@ -352,6 +352,8 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                     public void run() {
                         try {
                             ping();
+//                            page = page+1;
+//                            callPositionApi(page, 100);
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                         }
@@ -361,6 +363,8 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         };
         timerPing.schedule(doAsynchronousTask, 0, 10000); //execute in every 50000 ms
     }
+
+
 
     @Override
     public void onSuccessResponse(String tag, int responseCode, String responseMsg) {
@@ -447,6 +451,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
             timerPing.cancel();
             timerPing.purge();
         }
+
     }
 
     @Override
@@ -461,7 +466,8 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
             case R.id.btnMap:
                 break;
             case R.id.btnStatics:
-                Snackbar.make(lnrRoot, "Page under development", Snackbar.LENGTH_LONG).show();
+                callPositionApi(page,100);
+//                Snackbar.make(lnrRoot, "Page under development", Snackbar.LENGTH_LONG).show();
                 break;
             case R.id.imgMapType:
                 if (mMap!=null){
@@ -497,4 +503,6 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         }
         super.onBackStackChanged();
     }
+
+
 }

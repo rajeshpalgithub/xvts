@@ -204,12 +204,12 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
 
                 break;
             case R.id.lnrGeofenceList:
-                SpeedVtsGeofence vtsGeofence = (SpeedVtsGeofence) view.getTag();
-                GeofenceDetailView geofenceDetailViewfragment = new GeofenceDetailView();
-                Bundle bundle = new Bundle();
-                bundle.putString(BundleKeys.geofence_details_id, vtsGeofence.id);
-                geofenceDetailViewfragment.setArguments(bundle);
-                switchFrags(geofenceDetailViewfragment,geofenceDetailViewfragment.getClass().getName(),true);
+//                SpeedVtsGeofence vtsGeofence = (SpeedVtsGeofence) view.getTag();
+//                GeofenceDetailView geofenceDetailViewfragment = new GeofenceDetailView();
+//                Bundle bundle = new Bundle();
+//                bundle.putString(BundleKeys.geofence_details_id, vtsGeofence.id);
+//                geofenceDetailViewfragment.setArguments(bundle);
+//                switchFrags(geofenceDetailViewfragment,geofenceDetailViewfragment.getClass().getName(),true);
                 break;
             default:
                 break;

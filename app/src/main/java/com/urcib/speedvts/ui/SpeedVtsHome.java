@@ -14,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,16 +26,21 @@ import com.urcib.speedvts.R;
 import com.urcib.speedvts.app.SpeedVtsAppCombatBase;
 import com.urcib.speedvts.helper.SpeedVtsGeofenceController;
 import com.urcib.speedvts.helper.SpeedVtsPreferences;
+import com.urcib.speedvts.model.SpeedVtsGeofence;
 import com.urcib.speedvts.model.VehiclePosition;
 import com.urcib.speedvts.ui.fragments.GeoFenceList;
 import com.urcib.speedvts.ui.fragments.LivePresenceFragment;
 import com.urcib.speedvts.ui.fragments.ProfileFragment;
 import com.urcib.speedvts.webservice.RequestListener;
 import com.urcib.speedvts.webservice.WebService;
+import com.urcib.speedvts.webservice.api.WebserviceConstants;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -53,6 +59,9 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
     // Navigation view for slidemenu
     private NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
+
+    private Timer timerSyncGeofence;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +84,7 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
 
         switchFrags(new LivePresenceFragment(), "Live Presence", true);
+        syncGeofence();
     }
 
     @Override
@@ -96,6 +106,27 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
     @Override
     public void onSuccessResponse(String tag, int responseCode, String responseMsg) {
         super.onSuccessResponse(tag, responseCode, responseMsg);
+        try {
+            JSONObject jsObj = new JSONObject(responseMsg);
+            if (jsObj.has(WebserviceKeys.geofence)) {
+                JSONArray geoFenceArray = jsObj.getJSONArray(WebserviceKeys.geofence);
+                Gson gson = new Gson();
+                List<SpeedVtsGeofence> speedVtsGeofenceListToAdd = new ArrayList<SpeedVtsGeofence>();
+                for (int i=0;i<geoFenceArray.length();i++) {
+                    SpeedVtsGeofence geofenceFromAPi = gson.fromJson(geoFenceArray.get(i).toString(),
+                            SpeedVtsGeofence.class);
+                    if (!checkFenceAdded(geofenceFromAPi)){
+                        speedVtsGeofenceListToAdd.add(geofenceFromAPi);
+                    }
+                }
+
+                if (speedVtsGeofenceListToAdd.size()>0 && tag.equalsIgnoreCase(ApiMethods.geofence+"/get"))
+                    SpeedVtsGeofenceController.getInstance().addGeofence(speedVtsGeofenceListToAdd,
+                            geofenceControllerListener);
+            }
+        }catch (Exception ex){
+
+        }
 
     }
 
@@ -184,18 +215,6 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener
-            geofenceControllerListener = new SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener() {
-        @Override
-        public void onGeofencesUpdated() {
-
-        }
-
-        @Override
-        public void onError() {
-        }
-    };
-
     BroadcastReceiver internetReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -204,4 +223,57 @@ public class SpeedVtsHome extends SpeedVtsAppCombatBase implements
             }
         }
     };
+    public void syncGeofence() {
+        final Handler handler = new Handler();
+        timerSyncGeofence = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            getGeofenceList();
+//                            page = page+1;
+//                            callPositionApi(page, 100);
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timerSyncGeofence.schedule(doAsynchronousTask, 0, 60000); //execute in every 50000 ms
+    }
+
+    private void getGeofenceList(){
+        String getGeofenceUrl = BASE_URL + WebserviceConstants.ApiMethods.geofence + querySymbol +
+                WebserviceConstants.WebserviceKeys.token + equalSymbol +
+                SpeedVtsPreferences.getStringValue(this , token_key);
+        String tag =  WebserviceConstants.ApiMethods.geofence+"/get";
+        WebService.getInstance(this).doRequestwithGET(this, tag, getGeofenceUrl,
+                new HashMap<String, String>(), this, true);
+    }
+
+    private SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener
+            geofenceControllerListener = new SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener() {
+        @Override
+        public void onGeofencesUpdated() {
+            Log.d("geo", "onGeofencesUpdated() called with: " + "");
+        }
+
+        @Override
+        public void onError() {
+        }
+    };
+
+    private boolean checkFenceAdded(SpeedVtsGeofence speedVtsGeofence){
+        List<SpeedVtsGeofence> speedVtsGeofenceList = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();
+        for (int i=0; i<speedVtsGeofenceList.size(); i++){
+            if (speedVtsGeofence.id.equalsIgnoreCase(speedVtsGeofenceList.get(i).id)){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
