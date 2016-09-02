@@ -100,7 +100,8 @@ public class WelcomeActivity extends Activity implements RequestListener, Webser
                     // move to next screen
                     viewPager.setCurrentItem(current);
                 } else {
-                    launchHomeScreen();
+                    getGeofenceList();
+
                 }
             }
         });
@@ -128,13 +129,6 @@ public class WelcomeActivity extends Activity implements RequestListener, Webser
                 // last page. make button text to GOT IT
                 btnNext.setText(getString(R.string.start));
                 btnSkip.setVisibility(View.GONE);
-
-                findViewById(R.id.btnSync).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        getGeofenceList();
-                    }
-                });
             } else {
                 // still pages are left
                 btnNext.setText(getString(R.string.next));
@@ -207,6 +201,7 @@ public class WelcomeActivity extends Activity implements RequestListener, Webser
                     SpeedVtsGeofenceController.getInstance().addGeofence(speedVtsGeofenceListToAdd,
                             geofenceControllerListener);
             }
+            launchHomeScreen();
         }catch (Exception ex){
 
         }
