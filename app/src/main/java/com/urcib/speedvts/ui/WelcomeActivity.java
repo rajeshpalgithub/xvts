@@ -201,10 +201,12 @@ public class WelcomeActivity extends Activity implements RequestListener, Webser
                     SpeedVtsGeofenceController.getInstance().addGeofence(speedVtsGeofenceListToAdd,
                             geofenceControllerListener);
             }
-            launchHomeScreen();
+
         }catch (Exception ex){
 
         }
+
+        launchHomeScreen();
     }
 
     private SpeedVtsGeofenceController.SpeedVtsGeofenceControllerListener

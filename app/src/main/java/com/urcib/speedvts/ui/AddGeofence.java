@@ -315,7 +315,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             return;
         if (!validateFieldsEmpty(txtLongitude, "Please enter Longitude", main_content, getWindow()))
             return;
-        if (!validateFieldsEmpty(txtRadius, "Please enter Longitude", main_content, getWindow()))
+        if (!validateFieldsEmpty(txtRadius, "Please enter Radius", main_content, getWindow()))
             return;
 
         double latitude = Double.parseDouble(txtLatitude.getText().toString().trim());
