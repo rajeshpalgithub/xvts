@@ -51,5 +51,7 @@ public interface WebserviceConstants {
         String record = "record";
         String search_title = "search_title";
         String total_records = "total_records";
+        String geofence_id = "geofence_id";
+
     }
 }

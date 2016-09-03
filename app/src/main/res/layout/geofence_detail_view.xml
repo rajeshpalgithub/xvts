@@ -13,9 +13,11 @@
     card_view:cardCornerRadius="6dp">
 
     <LinearLayout
+        android:id="@+id/lnrRoot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:visibility="gone"
         android:orientation="vertical">
 
         <TextView
@@ -24,6 +26,28 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/dp_10"
             tools:text="Geofence Name"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="@dimen/Width.Label"
+                android:layout_height="wrap_content"
+                android:text="@string/description"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+            <TextView
+                android:id="@+id/lblDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/radius"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,7 +70,6 @@
                 android:textSize="@dimen/small_text"/>
 
         </LinearLayout>
-        <View style="@style/Geofence.Divider"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,6 +80,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+
                 android:orientation="horizontal">
 
                 <TextView
@@ -98,15 +122,99 @@
 
             </LinearLayout>
 
+
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/lblMeta"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/longitude"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/small_text"/>
+            android:orientation="horizontal" android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="@dimen/Width.Label"
+                android:layout_height="wrap_content"
+                android:text="Country"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+            <TextView
+                android:id="@+id/lblCountry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="country"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="@dimen/Width.Label"
+                android:layout_height="wrap_content"
+                android:text="Locality"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+            <TextView
+                android:id="@+id/lblLocality"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="locality"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="@dimen/Width.Label"
+                android:layout_height="wrap_content"
+                android:text="Admin area"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+            <TextView
+                android:id="@+id/lblAdminArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="admin area"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="@dimen/Width.Label"
+                android:layout_height="wrap_content"
+                android:text="Sub Locality"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+            <TextView
+                android:id="@+id/lblSubLocality"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sub Locality"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/small_text"/>
+
+        </LinearLayout>
+
+
 
 
     </LinearLayout>

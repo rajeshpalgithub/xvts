@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatSeekBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,6 +83,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
     private Button btnMap, btnStatics;
     VehiclePosition latestVehiclePosition;
     private boolean isMapScreen = true;
+    private  ImageView imgNextPositions;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -110,6 +110,8 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
         btnMap.setOnClickListener(this);
         seekPositionRecords = (ProgressBar) rootView.findViewById(R.id.seekPosition);
         seekPositionRecords.setVisibility(View.GONE);
+        imgNextPositions = (ImageView) rootView.findViewById(R.id.imgNextPositions);
+        imgNextPositions.setVisibility(View.GONE);
         rootView.findViewById(R.id.imgNextPositions).setOnClickListener(this);
 
         try {
@@ -513,6 +515,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                 btnStatics.setTextColor(getActivity().getResources().getColor(R.color.black));
                 btnMap.setTextColor(getActivity().getResources().getColor(R.color.colorAccent));
                 seekPositionRecords.setVisibility(View.GONE);
+                imgNextPositions.setVisibility(View.GONE);
                 break;
             case R.id.btnStatics:
                 isMapScreen = false;
@@ -520,6 +523,7 @@ public class LivePresenceFragment extends SpeedVtsFragmentBase implements OnMapR
                 btnStatics.setTextColor(getActivity().getResources().getColor(R.color.colorAccent));
                 btnMap.setTextColor(getActivity().getResources().getColor(R.color.black));
                 seekPositionRecords.setVisibility(View.VISIBLE);
+                imgNextPositions.setVisibility(View.VISIBLE);
                 callPositionApi(page, 100,true);
 //                Snackbar.make(lnrRoot, "Page under development", Snackbar.LENGTH_LONG).show();
                 break;

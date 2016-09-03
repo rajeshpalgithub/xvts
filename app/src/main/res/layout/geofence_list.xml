@@ -19,6 +19,7 @@
             android:padding="@dimen/dp_10"
             android:text="@string/no_geofence_yet"
             android:textColor="@android:color/black"
+            android:visibility="gone"
             android:textSize="@dimen/normal_text"/>
 
     </LinearLayout>
