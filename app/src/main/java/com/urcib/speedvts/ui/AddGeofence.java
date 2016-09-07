@@ -1,6 +1,7 @@
 package com.urcib.speedvts.ui;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -91,6 +93,10 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
     int position = 0;
 
     ImageView imgMapType;
+    View bottomSheet;
+
+    ProgressDialog progressDialog;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,6 +117,9 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle("Add Geofence");
 
+        progressDialog = new ProgressDialog(AddGeofence.this);
+        progressDialog.setMessage("Fetching Address. Please wait...");
+
         mMapView.getMapAsync(this);
         main_content = (CoordinatorLayout) findViewById(R.id.main_content);
 
@@ -119,6 +128,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         findViewById(R.id.lnrPull).setOnClickListener(this);
         findViewById(R.id.btnAddGeoFence).setOnClickListener(this);
         findViewById(R.id.btnCancel).setOnClickListener(this);
+        findViewById(R.id.lnrBottomPull).setOnClickListener(this);
 
         imgMapType = (ImageView) findViewById(R.id.imgMapType);
         imgMapType.setOnClickListener(this);
@@ -132,7 +142,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
 
         rgbEnter = (RadioGroup) findViewById(R.id.rgNotify);
 
-        View bottomSheet = findViewById(R.id.bottom_sheet);
+        bottomSheet = findViewById(R.id.bottom_sheet);
 
         if (bottomSheet != null) {
             mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -167,6 +177,8 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                 position = extras.getInt(BundleKeys.position);
             }
         }else{
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            bottomSheet.setVisibility(View.GONE);
             Snackbar.make(main_content, "Long press on a position in the map to add a Geo Fence.",
                     Snackbar.LENGTH_INDEFINITE).setAction("Okay", new View.OnClickListener() {
                 @Override
@@ -176,7 +188,6 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             }).show();
         }
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
     }
@@ -199,15 +210,6 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         mMap.setMyLocationEnabled(true);
         if (speedVtsGeofenceEdit == null) {
             mMap.setOnMapLongClickListener(this);
-
-            if (Build.VERSION.SDK_INT >=23){
-                if (ContextCompat.checkSelfPermission(AddGeofence.this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED){
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
-                }
-            }else{
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
-            }
 
             String pingUrl = BASE_URL + ApiMethods.ping + querySymbol + WebserviceKeys.token + "="
                     + SpeedVtsPreferences.getStringValue(AddGeofence.this, token_key);
@@ -248,7 +250,9 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             txtLatitude.setText(""+latLng.latitude);
             txtLongitude.setText(""+latLng.longitude);
             imgPull.setImageResource(R.drawable.ic_keyboard_arrow_down_white_24dp);
-            lnrAddContent.setVisibility(View.VISIBLE);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            bottomSheet.setVisibility(View.VISIBLE);
+            findViewById(R.id.lnrPull).setVisibility(View.GONE);
         }
     }
 
@@ -262,24 +266,32 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                     return;
                 }
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                bottomSheet.setVisibility(View.VISIBLE);
+                findViewById(R.id.lnrPull).setVisibility(View.GONE);
+                break;
+            case R.id.lnrBottomPull:
+                findViewById(R.id.lnrPull).setVisibility(View.VISIBLE);
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                bottomSheet.setVisibility(View.GONE);
                 break;
             case R.id.btnCancel:
-                if (speedVtsGeofenceEdit == null) {
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                    mMap.clear();
-                    txtLatitude.setText("");
-                    txtLongitude.setText("");
-                    findViewById(R.id.lnrPull).performClick();
-                    Snackbar.make(main_content, "Long press on a new position in the map to add a Geo Fence.",
-                            Snackbar.LENGTH_INDEFINITE).setAction("Okay", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                        }
-                    }).show();
-                }else {
-                    finish();
-                }
+//                if (speedVtsGeofenceEdit == null) {
+//                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+//                    mMap.clear();
+//                    txtLatitude.setText("");
+//                    txtLongitude.setText("");
+//                    findViewById(R.id.lnrPull).performClick();
+//                    Snackbar.make(main_content, "Long press on a new position in the map to add a Geo Fence.",
+//                            Snackbar.LENGTH_INDEFINITE).setAction("Okay", new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//
+//                        }
+//                    }).show();
+//                }else {
+//                    finish();
+//                }
+                finish();
 
                 break;
             case R.id.btnAddGeoFence:
@@ -318,6 +330,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         if (!validateFieldsEmpty(txtRadius, "Please enter Radius", main_content, getWindow()))
             return;
 
+
         double latitude = Double.parseDouble(txtLatitude.getText().toString().trim());
         double longitude = Double.parseDouble(txtLongitude.getText().toString().trim());
 
@@ -342,11 +355,10 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
         String strLongitude = txtLongitude.getText().toString();
         String strRadius = txtRadius.getText().toString();
 
-
         try
         {
             float radius = Float.parseFloat(strRadius);
-            Intent intent = new Intent();
+
             if (speedVtsGeofenceEdit==null){
                 SpeedVtsGeofence geofence = new SpeedVtsGeofence();
                 geofence.title = strTitle;
@@ -361,11 +373,8 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                     geofence.alert_when = "OUT";
                     geofence.whenEnter = false;
                 }
-                String meta = getAddress(latLngGeoFence.latitude, latLngGeoFence.longitude);
-                if (meta!=null){
-                    geofence.meta = getAddress(latLngGeoFence.latitude, latLngGeoFence.longitude);
-                }
-                intent.putExtra(BundleKeys.geofence_details, geofence);
+                new GetAddressAsyncTask(latLngGeoFence.latitude, latLngGeoFence.longitude, geofence).execute();
+
             }else {
                 if (rdbGroup.getCheckedRadioButtonId() == R.id.rdbtnWhenEnter){
                     speedVtsGeofenceEdit.alert_when = "IN";
@@ -376,47 +385,92 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                 }
                 speedVtsGeofenceEdit.title = strTitle;
                 speedVtsGeofenceEdit.message = strDescription;
+                new GetAddressAsyncTask(speedVtsGeofenceEdit.latitude, speedVtsGeofenceEdit.longitude, speedVtsGeofenceEdit).execute();
+
+            }
+
+
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+            progressDialog.dismiss();
+        }
+    }
+
+    class GetAddressAsyncTask extends AsyncTask<Void, Void, Void>{
+        String result = "";
+        double latitude,  longitude;
+
+        SpeedVtsGeofence geofence;
+
+        public GetAddressAsyncTask(double latitude, double longitude, SpeedVtsGeofence geofence){
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.geofence = geofence;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                Geocoder geocoder = new Geocoder(AddGeofence.this, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                if (addresses.size() > 0) {
+                    Address address = addresses.get(0);
+                    JSONObject jsonObject = new JSONObject();
+                    if (address.getAdminArea()!=null)
+                        jsonObject.put("admin_area", address.getAdminArea());
+                    if (address.getLocality()!=null)
+                        jsonObject.put("locality", address.getLocality());
+                    if (address.getSubLocality()!=null)
+                        jsonObject.put("sub_locality", address.getSubLocality());
+                    if (address.getSubAdminArea()!=null)
+                        jsonObject.put("sub_admin_area", address.getSubAdminArea());
+                    if (address.getCountryName()!=null)
+                        jsonObject.put("country", address.getCountryName());
+                    Gson gson = new Gson();
+//                result = gson.toJson(address);
+                    result = jsonObject.toString();
+                }
+            } catch (IOException e) {
+                logD(e.getMessage());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            progressDialog.dismiss();
+            Intent intent = new Intent();
+            if (result!=null){
+                geofence.meta = result;
+            }
+            intent.putExtra(BundleKeys.geofence_details, geofence);
+            if (speedVtsGeofenceEdit!=null){
                 intent.putExtra(BundleKeys.position, position);
                 intent.putExtra(BundleKeys.geofence_details, speedVtsGeofenceEdit);
             }
             setResult(RESULT_OK, intent);
             finish();
-
-        }catch (Exception ex){
-            ex.printStackTrace();
+            super.onPostExecute(aVoid);
         }
     }
 
-    private String getAddress(double latitude, double longitude) {
-        String result = "";
-        try {
-            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            if (addresses.size() > 0) {
-                Address address = addresses.get(0);
-                JSONObject jsonObject = new JSONObject();
-                if (address.getAdminArea()!=null)
-                    jsonObject.put("admin_area", address.getAdminArea());
-                if (address.getLocality()!=null)
-                    jsonObject.put("locality", address.getLocality());
-                if (address.getSubLocality()!=null)
-                    jsonObject.put("sub_locality", address.getSubLocality());
-                if (address.getSubAdminArea()!=null)
-                    jsonObject.put("sub_admin_area", address.getSubAdminArea());
-                if (address.getCountryName()!=null)
-                    jsonObject.put("country", address.getCountryName());
-                Gson gson = new Gson();
-//                result = gson.toJson(address);
-                result = jsonObject.toString();
-            }
-        } catch (IOException e) {
-            logD(e.getMessage());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return result.toString();
-    }
+//    private String getAddress(double latitude, double longitude) {
+//
+//
+//
+//
+//
+//        return result.toString();
+//    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -446,10 +500,7 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
                 mMap.animateCamera(cameraUpdate);
                 locationManager.removeUpdates(this);
-            }else{
-
             }
-
         }
     }
 
@@ -476,6 +527,20 @@ public class AddGeofence extends SpeedVtsAppCombatBase implements OnMapReadyCall
             }
         }catch (Exception ex){
             ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onErrorResponse(String tag, int responseCode, String responseMsg) {
+        super.onErrorResponse(tag, responseCode, responseMsg);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (Build.VERSION.SDK_INT >=23){
+            if (ContextCompat.checkSelfPermission(AddGeofence.this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED){
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
+            }
+        }else{
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, this);
         }
     }
 }

@@ -30,6 +30,7 @@ import com.google.android.gms.common.api.Api;
 import com.google.gson.Gson;
 import com.urcib.speedvts.R;
 import com.urcib.speedvts.adapters.GeofenceListAdapter;
+import com.urcib.speedvts.adapters.GeofenceListViewAdapter;
 import com.urcib.speedvts.adapters.OnLoadMoreListener;
 import com.urcib.speedvts.app.SpeedVtsFragmentBase;
 import com.urcib.speedvts.helper.BundleKeys;
@@ -39,6 +40,7 @@ import com.urcib.speedvts.model.SpeedVtsGeofence;
 import com.urcib.speedvts.ui.AddGeofence;
 import com.urcib.speedvts.ui.LoginScreen;
 import com.urcib.speedvts.webservice.WebService;
+import com.urcib.speedvts.widgets.LoadMoreListView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -58,8 +60,7 @@ import java.util.List;
 public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickListener {
 
     private View rootView;
-    private RecyclerView recViewGeofenceList;
-    private GeofenceListAdapter geofenceListAdapter;
+
 
     private final int ADD_GEOFENCE = 123;
     private SpeedVtsGeofence speedVtsGeofence;
@@ -74,6 +75,14 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
     private int deletePosition = 0;
 
     private FrameLayout lnrFrameContainer;
+
+    private LoadMoreListView loadMoreListView;
+    int limit = 10;
+    int offset = 0;
+    boolean loadingMore = false;
+    private GeofenceListViewAdapter geofenceListViewAdapter;
+
+    String searchText = "";
 
 
     @Nullable
@@ -106,7 +115,8 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                 page = 1;
                 arrListSpeedGeofences.clear();
                 notifyToAdapter();
-                getGeofenceList(true, query);
+                searchText = query;
+                getGeofenceList(true);
                 return false;
             }
 
@@ -123,7 +133,8 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                 page = 1;
                 arrListSpeedGeofences.clear();
                 notifyToAdapter();
-                getGeofenceList(true, null);
+                searchText = "";
+                getGeofenceList(true);
                 return false;
             }
         });
@@ -132,26 +143,37 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
 
     private void init() {
         lnrFrameContainer = (FrameLayout) rootView.findViewById(R.id.lnrFrameContainer);
-        getGeofenceList(true, null);
-        recViewGeofenceList = (RecyclerView) rootView.findViewById(R.id.recViewGeofenceList);
-        recViewGeofenceList.setHasFixedSize(true);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recViewGeofenceList.setLayoutManager(layoutManager);
-        recViewGeofenceList.setHasFixedSize(true);
+        getGeofenceList(true);
+
+        loadMoreListView = (LoadMoreListView) rootView.findViewById(R.id.loadMoreListView);
+        loadMoreListView.setFocusable(false);
+
+        loadMoreListView.setOnLoadMoreListener(new LoadMoreListView.OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                loadingMore = true;
+
+                if (loadingMore) {
+                    page = page + 1;
+                    getGeofenceList(false);
+
+                }
+            }
+        });
 
         rootView.findViewById(R.id.fabAddGeoFence).setOnClickListener(this);
     }
 
-    private void getGeofenceList(boolean loading, String strSearch) {
+    private void getGeofenceList(boolean loading) {
         String getGeofenceUrl = BASE_URL + ApiMethods.geofence + querySymbol +
                 WebserviceKeys.token + equalSymbol + SpeedVtsPreferences.getStringValue(getActivity(), token_key)
                 + andSymbol + WebserviceKeys.page + equalSymbol + page + andSymbol
                 + WebserviceKeys.record + equalSymbol + record;
         logD(getGeofenceUrl);
         String tag = ApiMethods.geofence + "/get";
-        if (strSearch != null && strSearch.length() > 0) {
+        if (searchText != null && searchText.length() > 0) {
             tag = ApiMethods.geofence + "/search";
-            getGeofenceUrl = getGeofenceUrl + andSymbol + WebserviceKeys.search_title + equalSymbol + strSearch;
+            getGeofenceUrl = getGeofenceUrl + andSymbol + WebserviceKeys.search_title + equalSymbol + searchText;
         }
 
         WebService.getInstance(getActivity()).doRequestwithGET(getActivity(), tag, getGeofenceUrl,
@@ -295,13 +317,16 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
     };
 
     private void notifyToAdapter() {
-        geofenceListAdapter.notifyDataSetChanged();
+        if (geofenceListViewAdapter!=null){
+            geofenceListViewAdapter.notifyDataSetChanged();
 
-        if (geofenceListAdapter.getItemCount() > 0) {
-            rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.GONE);
-        } else {
-            rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.VISIBLE);
+            if (geofenceListViewAdapter.getCount() > 0) {
+                rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.GONE);
+            } else {
+                rootView.findViewById(R.id.lblNoGeofence).setVisibility(View.VISIBLE);
+            }
         }
+
     }
 
     @Override
@@ -318,8 +343,8 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                 List<SpeedVtsGeofence> speedVtsGeofenceListToAdd = new ArrayList<SpeedVtsGeofence>();
                 speedVtsGeofenceListToAdd.add(speedVtsGeofence);
                 arrListSpeedGeofences.add(speedVtsGeofence);
-                geofenceListAdapter.notifyDataSetChanged();
-                geofenceListAdapter.setLoaded();
+                geofenceListViewAdapter.notifyDataSetChanged();
+                loadMoreListView.onLoadMoreComplete();
                 SpeedVtsGeofenceController.getInstance().addGeofence(speedVtsGeofenceListToAdd,
                         geofenceControllerListener);
                 Snackbar.make(lnrFrameContainer, "\"" + speedVtsGeofence.title + "\" Geofence added successfully.", Snackbar.LENGTH_LONG).show();
@@ -337,8 +362,8 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                             editor.putString(speedVtsGeofence.geofenceId, json);
                             editor.apply();
                             arrListSpeedGeofences.set(editPosition, speedVtsGeofence);
-                            geofenceListAdapter.notifyDataSetChanged();
-                            geofenceListAdapter.setLoaded();
+                            geofenceListViewAdapter.notifyDataSetChanged();
+                            loadMoreListView.onLoadMoreComplete();
                             break;
                         }
                     }
@@ -354,8 +379,8 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                     SpeedVtsGeofenceController.getInstance().removeGeofences(speedVtsGeofenceListToRemove,
                             geofenceControllerListener);
                     arrListSpeedGeofences.remove(deletePosition);
-                    geofenceListAdapter.notifyDataSetChanged();
-                    geofenceListAdapter.setLoaded();
+                    geofenceListViewAdapter.notifyDataSetChanged();
+                    loadMoreListView.onLoadMoreComplete();
 
                     Snackbar.make(lnrFrameContainer, "\"" + speedVtsGeofence.title + "\" Geofence deleted successfully.", Snackbar.LENGTH_LONG).show();
 
@@ -387,32 +412,17 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
                     if (speedVtsGeofenceListToAdd.size() > 0 && tag.equalsIgnoreCase(ApiMethods.geofence + "/get"))
                         SpeedVtsGeofenceController.getInstance().addGeofence(speedVtsGeofenceListToAdd,
                                 geofenceControllerListener);
-                }
-                if (geofenceListAdapter != null) {
-                    logD(tag);
-                    if (tag.equalsIgnoreCase(ApiMethods.geofence + "/get")) {
-//                        arrListSpeedGeofences = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();
-                        geofenceListAdapter.notifyDataSetChanged();
-                        geofenceListAdapter.setLoaded();
-                    } else if (tag.equalsIgnoreCase(ApiMethods.geofence + "/search")) {
-                        logD("inside search results");
-                        logD("Clear the adapter and reset");
-                        geofenceListAdapter = new GeofenceListAdapter(
-                                arrListSpeedGeofences, this, recViewGeofenceList,this);
-                        logD(geofenceListAdapter.getItemCount() + "");
-                        recViewGeofenceList.setAdapter(geofenceListAdapter);
 
-                        setLoadMoreListner(searchView.getQuery().toString());
-                    }
-                } else {
-                    logI("Adapter null");
-//                    arrListSpeedGeofences = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();
-                    geofenceListAdapter = new GeofenceListAdapter(
-                            arrListSpeedGeofences, this, recViewGeofenceList,this);
-                    recViewGeofenceList.setAdapter(geofenceListAdapter);
-
-                    setLoadMoreListner(null);
+                    loadingMore = false;
                 }
+
+                if (geofenceListViewAdapter !=null && loadMoreListView!=null){
+                    geofenceListViewAdapter.notifyDataSetChanged();
+                }else if (loadMoreListView!=null){
+                    geofenceListViewAdapter = new GeofenceListViewAdapter(arrListSpeedGeofences, this, getActivity());
+                    loadMoreListView.setAdapter(geofenceListViewAdapter);
+                }
+                loadMoreListView.onLoadMoreComplete();
             }
 
         } catch (Exception ex) {
@@ -427,25 +437,6 @@ public class GeoFenceList extends SpeedVtsFragmentBase implements View.OnClickLi
 
     }
 
-    private void setLoadMoreListner(final String searchText) {
-        logD("Load more listener initiated");
-        geofenceListAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                arrListSpeedGeofences.add(null);
-                geofenceListAdapter.notifyItemInserted(arrListSpeedGeofences.size() - 1);
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        arrListSpeedGeofences.remove(arrListSpeedGeofences.size() - 1);
-                        geofenceListAdapter.notifyItemRemoved(arrListSpeedGeofences.size());
-                        page = page + 1;
-                        getGeofenceList(false, searchText);
-                    }
-                }, 5000);
-            }
-        });
-    }
 
     private boolean checkFenceAdded(SpeedVtsGeofence speedVtsGeofence) {
         List<SpeedVtsGeofence> speedVtsGeofenceList = SpeedVtsGeofenceController.getInstance().getSpeedVtsGeofences();

@@ -151,7 +151,8 @@ public class SpeedVtsGeofenceController {
     for (SpeedVtsGeofence speedVtsGeofence : speedVtsGeofencesToRemove) {
       int index = speedVtsGeofences.indexOf(speedVtsGeofence);
       editor.remove(speedVtsGeofence.geofenceId);
-      speedVtsGeofences.remove(index);
+      if (index>0)
+        speedVtsGeofences.remove(index);
       editor.apply();
     }
 
